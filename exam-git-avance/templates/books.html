@@ -1,0 +1,9 @@
+
+{{ define "content" }}
+<h2>Liste des livres</h2>
+<ul>
+    {{ range . }}
+        <li><a href="/book/{{ .ID }}">{{ .Title }}</a> — {{ .Author }}</li>
+    {{ end }}
+</ul>
+{{ end }}

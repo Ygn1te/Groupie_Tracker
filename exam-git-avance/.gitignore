@@ -1,0 +1,11 @@
+
+# Go build
+bin/
+pkg/
+
+# Ignore modules (TP requirement)
+go.mod
+go.sum
+
+# Editors
+.vscode/
