@@ -1,10 +1,20 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-    <head>
-        <meta charset="UTF-8">
-        <title>Band List</title>
-        <link rel="stylesheet" href="../assets/style.css">
-    </head>
-    <body>
-    </body>
+<head>
+  <meta charset="utf-8">
+  <title>Groupie Tracker</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<h1>Groupie Tracker</h1>
+<div class="grid">
+{{range .}}
+  <div class="card">
+    <img src="{{.Image}}">
+    <h2>{{.Name}}</h2>
+    <a href="/artist/{{.ID}}">Voir</a>
+  </div>
+{{end}}
+</div>
+</body>
 </html>

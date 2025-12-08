@@ -50,7 +50,7 @@ func GetLocationsByID(id int) ([]string, error) {
 }
 
 func Home(w http.ResponseWriter, r *http.Request) {
-	tmpl, err := template.ParseFiles("templates/index.html")
+	tmpl, err := template.ParseFiles("templates/band_list.html")
 	if err != nil {
 		http.Error(w, "Erreur template", http.StatusInternalServerError)
 		return
@@ -109,7 +109,7 @@ func ArtistDetail(w http.ResponseWriter, r *http.Request) {
 		Locations []string
 	}{found, dates, locations}
 
-	tmpl, err := template.ParseFiles("templates/artist.html")
+	tmpl, err := template.ParseFiles("templates/band_info.html")
 	if err != nil {
 		http.Error(w, "Erreur template", http.StatusInternalServerError)
 		return

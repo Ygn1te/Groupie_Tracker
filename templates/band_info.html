@@ -1,10 +1,15 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-    <head>
-        <meta charset="UTF-8">
-        <title>Band List</title>
-        <link rel="stylesheet" href="../assets/style.css">
-    </head>
-    <body>
-    </body>
+<head><title>{{.Artist.Name}}</title></head>
+<body>
+<h1>{{.Artist.Name}}</h1>
+<img src="{{.Artist.Image}}" width="300">
+<p>Membres:</p>
+<ul>{{range .Artist.Members}}<li>{{.}}</li>{{end}}</ul>
+<p>Dates:</p>
+<ul>{{range .Dates}}<li>{{.}}</li>{{end}}</ul>
+<p>Locations:</p>
+<ul>{{range .Locations}}<li>{{.}}</li>{{end}}</ul>
+<a href="/">Retour</a>
+</body>
 </html>
