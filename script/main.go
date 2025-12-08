@@ -10,6 +10,6 @@ func main() {
 		fmt.Fprintln(w, "Bienvenue sur mon serveur Go !")
 	})
 
-	fmt.Println("Serveur démarré sur le port 8080...")
+	fmt.Println("Serveur démarré http://127.0.0.1:8080/.")
 	http.ListenAndServe(":8080", nil)
 }
