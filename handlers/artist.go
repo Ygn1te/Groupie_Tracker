@@ -97,17 +97,44 @@ func ArtistDetail(w http.ResponseWriter, r *http.Request) {
 		log.Println("Dates error:", err)
 		dates = []string{}
 	}
+
 	locations, err := GetLocationsByID(id)
 	if err != nil {
 		log.Println("Locations error:", err)
 		locations = []string{}
 	}
 
+	// Géocodage (OpenCage) + cache
+	var geoLocations []GeoLocation
+	for _, loc := range locations {
+		gl, err := GeocodeOpenCage(loc)
+		if err == nil {
+			geoLocations = append(geoLocations, gl)
+		} else {
+			log.Println("Geocode error:", err)
+		}
+	}
+
+	// On injecte du JSON directement pour le JS (plus fiable)
+	geoJSONBytes, err := json.Marshal(geoLocations)
+	if err != nil {
+		log.Println("GeoJSON error:", err)
+		geoJSONBytes = []byte("[]")
+	}
+
 	data := struct {
-		Artist    *models.Artist
-		Dates     []string
-		Locations []string
-	}{found, dates, locations}
+		Artist       *models.Artist
+		Dates        []string
+		Locations    []string
+		GeoLocations []GeoLocation
+		GeoJSON      template.JS
+	}{
+		Artist:       found,
+		Dates:        dates,
+		Locations:    locations,
+		GeoLocations: geoLocations,
+		GeoJSON:      template.JS(geoJSONBytes),
+	}
 
 	tmpl, err := template.ParseFiles("templates/artist.html")
 	if err != nil {

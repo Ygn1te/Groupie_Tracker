@@ -1,15 +1,84 @@
 <!doctype html>
-<html>
-<head><title>{{.Artist.Name}}</title></head>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <title>{{.Artist.Name}}</title>
+
+  <style>
+    body { font-family: Arial, sans-serif; margin: 24px; }
+    img { border-radius: 12px; margin-top: 8px; }
+    ul { line-height: 1.6; }
+
+    #map {
+      height: 420px;
+      width: 100%;
+      border-radius: 12px;
+      margin-top: 12px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+    }
+    a {
+      display: inline-block;
+      margin-top: 18px;
+      text-decoration: none;
+      font-weight: bold;
+      color: #1a73e8;
+    }
+    a:hover { text-decoration: underline; }
+  </style>
+</head>
+
 <body>
-<h1>{{.Artist.Name}}</h1>
-<img src="{{.Artist.Image}}" width="300">
-<p>Membres:</p>
-<ul>{{range .Artist.Members}}<li>{{.}}</li>{{end}}</ul>
-<p>Dates:</p>
-<ul>{{range .Dates}}<li>{{.}}</li>{{end}}</ul>
-<p>Locations:</p>
-<ul>{{range .Locations}}<li>{{.}}</li>{{end}}</ul>
-<a href="/">Retour</a>
+  <h1>{{.Artist.Name}}</h1>
+  <img src="{{.Artist.Image}}" width="300" alt="image artiste">
+
+  <h2>Membres</h2>
+  <ul>
+    {{range .Artist.Members}}<li>{{.}}</li>{{end}}
+  </ul>
+
+  <h2>Dates</h2>
+  <ul>
+    {{range .Dates}}<li>{{.}}</li>{{end}}
+  </ul>
+
+  <h2>Locations</h2>
+  <ul>
+    {{range .Locations}}<li>{{.}}</li>{{end}}
+  </ul>
+
+  <h2>Carte des concerts</h2>
+  <div id="map"></div>
+
+  <a href="/">⬅ Retour</a>
+
+  <!-- Leaflet (en bas = plus fiable) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+  <script>
+    const points = {{ .GeoJSON }};
+
+    const map = L.map('map').setView([48.8566, 2.3522], 3);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 18,
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    const bounds = [];
+
+    points.forEach(p => {
+      const marker = L.marker([p.lat, p.lng]).addTo(map);
+      marker.bindPopup("<b>" + p.name + "</b>");
+      bounds.push([p.lat, p.lng]);
+    });
+
+    if (bounds.length > 0) {
+      map.fitBounds(bounds, { padding: [30, 30] });
+    }
+
+    // Fix affichage si la div se charge après
+    setTimeout(() => map.invalidateSize(), 200);
+  </script>
 </body>
 </html>
