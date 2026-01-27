@@ -1,1 +1,27 @@
 body { font-family: Arial; text-align: center; }
+    #searchBar {
+      padding: 10px;
+      font-size: 16px;
+      width: 300px;
+      margin: 20px 0;
+    }
+    #suggestions {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      border: 1px solid #ddd;
+      max-height: 300px;
+      overflow-y: auto;
+      display: none;
+    }
+    #suggestions.active {
+      display: block;
+    }
+    #suggestions li {
+      padding: 8px 12px;
+      cursor: pointer;
+      border-bottom: 1px solid #eee;
+    }
+    #suggestions li:hover {
+      background-color: #e52323;
+    }
