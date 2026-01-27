@@ -1,27 +1,67 @@
-body { font-family: Arial; text-align: center; }
-    #searchBar {
+body {
+ background-color: #1a1a1a;
+    color: #fefefe;
+  font-family: Arial;
+  text-align: center;
+  #searchBar {
       padding: 10px;
       font-size: 16px;
       width: 300px;
       margin: 20px 0;
     }
     #suggestions {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-      border: 1px solid #ddd;
-      max-height: 300px;
-      overflow-y: auto;
-      display: none;
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        border: 1px solid #cd2727;
+        max-height: 300px;
+        overflow-y: auto;
+        display: none;
     }
     #suggestions.active {
-      display: block;
+        display: block;
     }
     #suggestions li {
-      padding: 8px 12px;
-      cursor: pointer;
-      border-bottom: 1px solid #eee;
+        padding: 8px 12px;
+        cursor: pointer;
+        border-bottom: 1px solid #cd3232;
     }
     #suggestions li:hover {
-      background-color: #e52323;
+        background-color: #000000;
     }
+
+    
+.artistsGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+
+.card {
+  display: block;
+  width: 200px;
+  margin: 10px;
+  border: 1px solid #ccc;
+  padding: 10px;
+  text-align: center;
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.2s ease;
+
+}
+.card img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+}
+.card:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 10px rgba(0,0,0,0.2);
+}
+
+
+}

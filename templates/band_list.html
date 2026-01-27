@@ -3,22 +3,27 @@
 <head>
   <meta charset="utf-8">
   <title>Groupie Tracker</title>
-  <link rel="stylesheet" href="/static/style.css">
+<link rel="stylesheet" href="/static/style.css">
 
 </head>
 <body>
+ 
+
   <h1>Groupie Tracker</h1>
   <input type="text" id="searchBar" placeholder="Rechercher un chanteur...">
   <ul id="suggestions"></ul>
 <div class="artistsGrid">
-{{range .}}
-  <div class="card">
-    <img src="{{.Image}}">
-    <h2>{{.Name}}</h2>
-    <a href="/artist/{{.ID}}">Voir</a>
-  </div>
-{{end}}
+  {{range .}}
+    <a href="/artist/{{.ID}}" class="card">
+  <img src="{{.Image}}" alt="{{.Name}}">
+  <h2>{{.Name}}</h2>
+</a>
+
+
+  {{end}}
 </div>
+
 <script src="/static/test_search bar.js"></script>
+
 </body>
 </html>
