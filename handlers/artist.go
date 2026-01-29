@@ -3,7 +3,6 @@ package handlers
 import (
 	"encoding/json"
 	"html/template"
-	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -12,6 +11,10 @@ import (
 )
 
 const baseAPI = "https://groupietrackers.herokuapp.com/api"
+
+var templates = template.Must(
+	template.ParseGlob("templates/*.html"),
+)
 
 func GetArtists() ([]models.Artist, error) {
 	resp, err := http.Get(baseAPI + "/artists")
@@ -50,19 +53,15 @@ func GetLocationsByID(id int) ([]string, error) {
 }
 
 func Home(w http.ResponseWriter, r *http.Request) {
-	tmpl, err := template.ParseFiles("templates/band_list.html")
-	if err != nil {
-		http.Error(w, "Erreur template", http.StatusInternalServerError)
-		return
-	}
-
 	artists, err := GetArtists()
 	if err != nil {
 		http.Error(w, "Impossible de récupérer les artistes", http.StatusInternalServerError)
 		return
 	}
-
-	tmpl.Execute(w, artists)
+	err = templates.ExecuteTemplate(w, "layout.html", artists)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
 }
 
 func ArtistDetail(w http.ResponseWriter, r *http.Request) {
@@ -74,10 +73,6 @@ func ArtistDetail(w http.ResponseWriter, r *http.Request) {
 	}
 
 	artists, err := GetArtists()
-	if err != nil {
-		http.Error(w, "Impossible de lire artistes", http.StatusInternalServerError)
-		return
-	}
 
 	var found *models.Artist
 	for _, a := range artists {
@@ -93,29 +88,23 @@ func ArtistDetail(w http.ResponseWriter, r *http.Request) {
 	}
 
 	dates, err := GetDatesByID(id)
-	if err != nil {
-		log.Println("Dates error:", err)
-		dates = []string{}
-	}
 	locations, err := GetLocationsByID(id)
-	if err != nil {
-		log.Println("Locations error:", err)
-		locations = []string{}
-	}
 
 	data := struct {
 		Artist    *models.Artist
 		Dates     []string
 		Locations []string
-	}{found, dates, locations}
-
-	tmpl, err := template.ParseFiles("templates/band_info.html")
-	if err != nil {
-		http.Error(w, "Erreur template", http.StatusInternalServerError)
-		return
+	}{
+		found,
+		dates,
+		locations,
 	}
 
-	tmpl.Execute(w, data)
+	err = templates.ExecuteTemplate(w, "layout.html", data)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 }
 
 func Search(w http.ResponseWriter, r *http.Request) {
