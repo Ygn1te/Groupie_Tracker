@@ -49,6 +49,12 @@ func GetLocationsByID(id int) ([]string, error) {
 	return l.Locations, err
 }
 
+// Données envoyées au template index (liste + recherche)
+type IndexData struct {
+	Artists []models.Artist
+	Query   string
+}
+
 func Home(w http.ResponseWriter, r *http.Request) {
 	tmpl, err := template.ParseFiles("templates/index.html")
 	if err != nil {
@@ -62,7 +68,12 @@ func Home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tmpl.Execute(w, artists)
+	data := IndexData{
+		Artists: artists,
+		Query:   "",
+	}
+
+	tmpl.Execute(w, data)
 }
 
 func ArtistDetail(w http.ResponseWriter, r *http.Request) {
@@ -146,20 +157,84 @@ func ArtistDetail(w http.ResponseWriter, r *http.Request) {
 }
 
 func Search(w http.ResponseWriter, r *http.Request) {
-	q := strings.ToLower(r.URL.Query().Get("q"))
+	raw := strings.TrimSpace(r.URL.Query().Get("q"))
+	q := strings.ToLower(raw)
+
 	artists, err := GetArtists()
 	if err != nil {
 		http.Error(w, "Impossible de récupérer artistes", http.StatusInternalServerError)
 		return
 	}
 
+	// Recherche vide -> on affiche tout
+	if q == "" {
+		tmpl, err := template.ParseFiles("templates/index.html")
+		if err != nil {
+			http.Error(w, "Erreur template", http.StatusInternalServerError)
+			return
+		}
+
+		data := IndexData{Artists: artists, Query: ""}
+		tmpl.Execute(w, data)
+		return
+	}
+
+	// ✅ NAME ONLY + ✅ COMMENCE PAR (prefix)
 	var res []models.Artist
 	for _, a := range artists {
-		if strings.Contains(strings.ToLower(a.Name), q) {
+		if strings.HasPrefix(strings.ToLower(a.Name), q) {
 			res = append(res, a)
 		}
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(res)
+	tmpl, err := template.ParseFiles("templates/index.html")
+	if err != nil {
+		http.Error(w, "Erreur template", http.StatusInternalServerError)
+		return
+	}
+
+	data := IndexData{
+		Artists: res,
+		Query:   raw,
+	}
+
+	tmpl.Execute(w, data)
+}
+
+// ✅ Suggestions JSON pour l'autocomplete (name commence par)
+func Suggest(w http.ResponseWriter, r *http.Request) {
+	raw := strings.TrimSpace(r.URL.Query().Get("q"))
+	q := strings.ToLower(raw)
+
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+
+	if q == "" {
+		json.NewEncoder(w).Encode([]any{})
+		return
+	}
+
+	artists, err := GetArtists()
+	if err != nil {
+		http.Error(w, "Impossible de récupérer artistes", http.StatusInternalServerError)
+		return
+	}
+
+	type SuggestItem struct {
+		ID   int    `json:"id"`
+		Name string `json:"name"`
+	}
+
+	const limit = 10
+	out := make([]SuggestItem, 0, limit)
+
+	for _, a := range artists {
+		if strings.HasPrefix(strings.ToLower(a.Name), q) {
+			out = append(out, SuggestItem{ID: a.ID, Name: a.Name})
+			if len(out) >= limit {
+				break
+			}
+		}
+	}
+
+	json.NewEncoder(w).Encode(out)
 }

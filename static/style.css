@@ -1,1 +1,111 @@
-body { font-family: Arial; text-align: center; }
+body {
+  font-family: Arial, sans-serif;
+  text-align: center;
+  margin: 0;
+  padding: 24px;
+}
+
+h1 { margin: 0 0 16px; }
+
+.searchbar {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  align-items: center;
+  max-width: 720px;
+  margin: 0 auto 18px;
+}
+
+.searchbar input {
+  flex: 1;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid #cfcfcf;
+  min-width: 220px;
+}
+
+.searchbar button {
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid #cfcfcf;
+  background: white;
+  cursor: pointer;
+}
+
+.searchbar .reset {
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.search-info { margin: 0 0 18px; }
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 14px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.card {
+  border: 1px solid #e6e6e6;
+  border-radius: 14px;
+  padding: 14px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+}
+
+.card img {
+  width: 100%;
+  height: auto;
+  border-radius: 12px;
+}
+
+.card h2 {
+  font-size: 18px;
+  margin: 12px 0;
+}
+
+.card a {
+  display: inline-block;
+  text-decoration: none;
+  font-weight: bold;
+  color: #1a73e8;
+}
+
+.card a:hover { text-decoration: underline; }
+
+/* ✅ Autocomplete */
+.searchwrap {
+  position: relative;
+  flex: 1;
+  max-width: 520px;
+}
+
+.suggestions {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #e6e6e6;
+  border-radius: 12px;
+  box-shadow: 0 10px 24px rgba(0,0,0,0.10);
+  overflow: hidden;
+  z-index: 50;
+  text-align: left;
+}
+
+.suggestions.hidden {
+  display: none;
+}
+
+.sugg-item {
+  display: block;
+  padding: 10px 12px;
+  text-decoration: none;
+  color: #111;
+}
+
+.sugg-item:hover {
+  background: #f3f6ff;
+}

@@ -6,15 +6,89 @@
   <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-<h1>Groupie Tracker</h1>
-<div class="grid">
-{{range .}}
-  <div class="card">
-    <img src="{{.Image}}">
-    <h2>{{.Name}}</h2>
-    <a href="/artist/{{.ID}}">Voir</a>
+  <h1>Groupie Tracker</h1>
+
+  <!-- Go (submit) + Suggestions (JS) -->
+  <form action="/search" method="GET" class="searchbar" autocomplete="off">
+    <div class="searchwrap">
+      <input
+        id="searchInput"
+        type="text"
+        name="q"
+        placeholder="Rechercher un groupe..."
+        value="{{.Query}}"
+        aria-label="Recherche"
+        autocomplete="off"
+      />
+      <div id="suggestions" class="suggestions hidden"></div>
+    </div>
+
+    <button type="submit">Rechercher</button>
+    <a href="/" class="reset">Reset</a>
+  </form>
+
+  {{if .Query}}
+    <p class="search-info">Résultats pour : <b>{{.Query}}</b></p>
+  {{end}}
+
+  {{if not .Artists}}
+    <p>Aucun résultat.</p>
+  {{end}}
+
+  <div class="grid">
+  {{range .Artists}}
+    <div class="card">
+      <img src="{{.Image}}" alt="{{.Name}}">
+      <h2>{{.Name}}</h2>
+      <a href="/artist/{{.ID}}">Voir</a>
+    </div>
+  {{end}}
   </div>
-{{end}}
-</div>
+
+  <script>
+    const input = document.getElementById("searchInput");
+    const box = document.getElementById("suggestions");
+    let timer = null;
+
+    function hideBox() {
+      box.classList.add("hidden");
+      box.innerHTML = "";
+    }
+
+    function showItems(items) {
+      if (!items || items.length === 0) return hideBox();
+
+      box.innerHTML = items.map(it =>
+        `<a class="sugg-item" href="/artist/${it.id}">${it.name}</a>`
+      ).join("");
+
+      box.classList.remove("hidden");
+    }
+
+    input.addEventListener("input", () => {
+      const q = input.value.trim();
+      clearTimeout(timer);
+
+      if (q === "") return hideBox();
+
+      timer = setTimeout(async () => {
+        try {
+          const res = await fetch(`/suggest?q=${encodeURIComponent(q)}`);
+          const data = await res.json();
+          showItems(data);
+        } catch (e) {
+          hideBox();
+        }
+      }, 120);
+    });
+
+    document.addEventListener("click", (e) => {
+      if (!e.target.closest(".searchwrap")) hideBox();
+    });
+
+    input.addEventListener("focus", () => {
+      if (box.innerHTML.trim() !== "") box.classList.remove("hidden");
+    });
+  </script>
 </body>
 </html>
