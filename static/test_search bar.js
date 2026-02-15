@@ -1,73 +1,93 @@
-const searchBar = document.getElementById("searchBar");
-const suggestions = document.getElementById("suggestions");
+// Suggestions en temps réel
+const searchBar = document.getElementById('searchBar');
+const suggestionsList = document.getElementById('suggestions');
+
+async function fetchSuggestions(query) {
+    if (query.length === 0) {
+        suggestionsList.classList.remove('active');
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/search?q=${encodeURIComponent(query)}`);
+        const artists = await response.json();
+        displaySuggestions(artists);
+    } catch (error) {
+        console.error('Erreur:', error);
+        suggestionsList.classList.remove('active');
+    }
+}
+
+function displaySuggestions(artists) {
+    suggestionsList.innerHTML = '';
+    
+    if (!artists || artists.length === 0) {
+        suggestionsList.classList.remove('active');
+        return;
+    }
+    
+    artists.forEach(artist => {
+        const li = document.createElement('li');
+        li.textContent = artist.name;
+        
+        li.addEventListener('click', () => {
+            window.location.href = `/?q=${encodeURIComponent(artist.name)}`;
+        });
+        
+        suggestionsList.appendChild(li);
+    });
+    
+    suggestionsList.classList.add('active');
+}
+
+searchBar.addEventListener('input', (e) => {
+    const query = e.target.value.trim();
+    fetchSuggestions(query);
+});
+
+// Fermer les suggestions au clic ailleurs
+document.addEventListener('click', (e) => {
+    if (e.target !== searchBar) {
+        suggestionsList.classList.remove('active');
+    }
+});
+
 const cardsSelector = ".artistsGrid .card";
 
-// Recherche en temps réel avec le paramètre 'q'
-async function updateSuggestions(query) {
-  if (query.length < 1) {
-    suggestions.classList.remove("active");
-    suggestions.innerHTML = "";
-    return;
-  }
-  try {
-    const response = await fetch(`/search?q=${encodeURIComponent(query)}`);
-    const data = await response.json() || [];
-    console.log("Données reçues:", data);
-    // Filtre les chanteurs qui COMMENCENT par la requête
-    const filtered = data.filter(ch => 
-      (ch.name || ch.Name || "").toLowerCase().startsWith(query.toLowerCase())
-    );
-    console.log("Suggestions filtrées:", filtered);
-    
-    if (filtered.length > 0) {
-      suggestions.innerHTML = filtered
-        .slice(0, 10) // Limite à 10 suggestions
-        .map(ch => `<li data-id="${ch.id || ch.ID}">${ch.name || ch.Name}</li>`)
-        .join("");
-      suggestions.classList.add("active");
-    } else {
-      suggestions.classList.remove("active");
-      suggestions.innerHTML = "";
-    }
-  } catch (err) {
-    console.error("Erreur API:", err);
-  }
-}
-
-function filterArtists() {
-  const q = searchBar.value.trim().toLowerCase();
-  document.querySelectorAll(cardsSelector).forEach(card => {
-    const name = (card.querySelector("h2")?.textContent || "").trim().toLowerCase();
-    // Filtre les artistes qui COMMENCENT par la requête
-    card.style.display = (!q || name.startsWith(q)) ? "" : "none";
+document.querySelectorAll('.card').forEach(card => { // Effet 3D au survol
+  card.addEventListener('mousemove', e => {
+    const rect = card.getBoundingClientRect();
+    const x = e.clientX - rect.left; // position X dans la carte
+    const y = e.clientY - rect.top;  // position Y dans la carte
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+    const rotateX = -(y - centerY) / 5;
+    const rotateY = (x - centerX) / 5;
+    card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
   });
-}
 
-async function onInput() {
-  const query = searchBar.value.trim();
-  await updateSuggestions(query);
-  filterArtists();
-}
-
-searchBar.addEventListener("input", onInput);
-searchBar.addEventListener("keydown", (e) => {
-  if (e.key === "Enter") { e.preventDefault(); filterArtists(); }
-});
-document.addEventListener("DOMContentLoaded", filterArtists);
-
-// Clic sur une suggestion pour la sélectionner
-document.addEventListener("click", (e) => {
-  if (e.target.tagName === "LI" && e.target.closest("#suggestions")) {
-    searchBar.value = e.target.textContent;
-    suggestions.classList.remove("active");
-    suggestions.innerHTML = "";
-    filterArtists();
-  }
+  card.addEventListener('mouseleave', () => {
+    card.style.transform = 'rotateX(0deg) rotateY(0deg)';
+  });
 });
 
-// Fermer les suggestions quand on clique ailleurs
-document.addEventListener("click", (e) => {
-  if (!e.target.closest("#searchBar") && !e.target.closest("#suggestions")) {
-    suggestions.classList.remove("active");
-  }
+
+document.querySelectorAll('.card').forEach(card => {
+  card.addEventListener('click', e => {
+    e.preventDefault(); // empêche la redirection immédiate
+
+    const url = card.getAttribute('href'); // récupère le lien de la card
+
+    card.classList.add('launch'); // ajoute l’effet
+
+    setTimeout(() => {
+      window.location.href = url; // redirection après l’animation
+    }, 300); // même durée que la transition CSS
+  });
+});
+
+window.addEventListener('pageshow', () => { // Réinitialise l’effet au retour sur la page 
+  document.querySelectorAll('.card').forEach(card => {
+    card.classList.remove('launch');
+  });
 });

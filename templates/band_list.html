@@ -7,13 +7,24 @@
 
 </head>
 <body>
- 
+
+
 
   <h1>Groupie Tracker</h1>
-  <input type="text" id="searchBar" placeholder="Rechercher un chanteur...">
-  <ul id="suggestions"></ul>
+  
+  {{if .Query}}<a href="/" class="back-button">← Retour</a>{{end}}
+  
+  <div class="search-container">
+    <input 
+      id="searchBar"
+      type="text" 
+      placeholder="Rechercher un chanteur..." 
+      autocomplete="off">
+    <ul id="suggestions"></ul>
+  </div>
+
 <div class="artistsGrid">
-  {{range .}}
+  {{range .Artists}}
     <a href="/artist/{{.ID}}" class="card">
   <img src="{{.Image}}" alt="{{.Name}}">
   <h2>{{.Name}}</h2>

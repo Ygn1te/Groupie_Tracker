@@ -1,15 +1,37 @@
 <!doctype html>
 <html>
-<head><title>{{.Artist.Name}}</title></head>
+<head>
+  <meta charset="utf-8">
+  <title>{{.Artist.Name}}</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
 <body>
-<h1>{{.Artist.Name}}</h1>
-<img src="{{.Artist.Image}}" width="300">
-<p>Membres:</p>
-<ul>{{range .Artist.Members}}<li>{{.}}</li>{{end}}</ul>
-<p>Dates:</p>
-<ul>{{range .Dates}}<li>{{.}}</li>{{end}}</ul>
-<p>Locations:</p>
-<ul>{{range .Locations}}<li>{{.}}</li>{{end}}</ul>
-<a href="/">Retour</a>
+  <a href="/" class="back-button">← Retour</a>
+  
+  <div class="artist-container">
+    <div class="artist-card-section">
+      <div class="artist-card">
+        <img src="{{.Artist.Image}}" alt="{{.Artist.Name}}">
+        <h1>{{.Artist.Name}}</h1>
+      </div>
+    </div>
+    
+    <div class="artist-info-section">
+      <div class="info-group">
+        <h2>Membres:</h2>
+        <ul>{{range .Artist.Members}}<li>{{.}}</li>{{end}}</ul>
+      </div>
+      
+      <div class="info-group">
+        <h2>Dates:</h2>
+        <ul>{{range .Dates}}<li>{{.}}</li>{{end}}</ul>
+      </div>
+      
+      <div class="info-group">
+        <h2>Locations:</h2>
+        <ul>{{range .Locations}}<li>{{.}}</li>{{end}}</ul>
+      </div>
+    </div>
+  </div>
 </body>
 </html>

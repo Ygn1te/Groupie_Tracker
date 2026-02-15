@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"strings"
 
-	"groupie-tracker/models"
+	"groupie_tracker/models"
 )
 
 const baseAPI = "https://groupietrackers.herokuapp.com/api"
@@ -56,13 +56,36 @@ func Home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	query := strings.ToLower(strings.TrimSpace(r.URL.Query().Get("q")))
+
 	artists, err := GetArtists()
 	if err != nil {
 		http.Error(w, "Impossible de récupérer les artistes", http.StatusInternalServerError)
 		return
 	}
 
-	tmpl.Execute(w, artists)
+	var filtered []models.Artist
+	for _, a := range artists {
+		name := strings.ToLower(a.Name)
+		if query == "" || strings.HasPrefix(name, query) {
+			filtered = append(filtered, a)
+		}
+	}
+
+	// Limiter à 5 résultats si une recherche est active
+	if query != "" && len(filtered) > 5 {
+		filtered = filtered[:5]
+	}
+
+	data := struct {
+		Query   string
+		Artists []models.Artist
+	}{
+		Query:   query,
+		Artists: filtered,
+	}
+
+	tmpl.Execute(w, data)
 }
 
 func ArtistDetail(w http.ResponseWriter, r *http.Request) {
