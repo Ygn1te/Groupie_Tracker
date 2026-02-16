@@ -9,15 +9,7 @@ import (
 	"strings"
 	"sync"
 	"time"
-
-	"github.com/joho/godotenv"
 )
-
-// Fallback : charge aussi le .env directement dans handlers
-// => comme ça, même si main oublie de le faire, ça marche.
-func init() {
-	godotenv.Load()
-}
 
 type GeoLocation struct {
 	Name string  `json:"name"`
@@ -41,14 +33,12 @@ var (
 )
 
 func normalizeLocation(loc string) string {
-	// "paris-france" -> "paris, france"
 	loc = strings.ReplaceAll(loc, "_", " ")
 	loc = strings.ReplaceAll(loc, "-", ", ")
 	return loc
 }
 
 func GeocodeOpenCage(location string) (GeoLocation, error) {
-	// Cache (évite de bouffer le quota)
 	geoMutex.RLock()
 	if val, ok := geoCache[location]; ok {
 		geoMutex.RUnlock()

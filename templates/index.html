@@ -1,93 +1,140 @@
 <!doctype html>
-<html>
+<html lang="fr">
 <head>
-  <meta charset="utf-8">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Groupie Tracker</title>
   <link rel="stylesheet" href="/static/style.css">
 </head>
-<body>
-  <h1>Groupie Tracker</h1>
+<body class="dark">
+  <header class="topbar">
+    <div class="container topbar__inner">
+      <a class="brand" href="/">Groupie Tracker</a>
 
-  <!-- Go (submit) + Suggestions (JS) -->
-  <form action="/search" method="GET" class="searchbar" autocomplete="off">
-    <div class="searchwrap">
-      <input
-        id="searchInput"
-        type="text"
-        name="q"
-        placeholder="Rechercher un groupe..."
-        value="{{.Query}}"
-        aria-label="Recherche"
-        autocomplete="off"
-      />
-      <div id="suggestions" class="suggestions hidden"></div>
+      <form class="searchbar" action="/" method="get" autocomplete="off">
+        <div class="searchwrap">
+          <input id="searchInput" type="search" name="q" placeholder="Rechercher (groupe ou membre)..." value="{{.Query}}">
+          <div id="suggestions" class="suggestions hidden"></div>
+        </div>
+        <button type="submit">Rechercher</button>
+        <a class="reset" href="/">Reset</a>
+      </form>
     </div>
+  </header>
 
-    <button type="submit">Rechercher</button>
-    <a href="/" class="reset">Reset</a>
-  </form>
+  <main class="container">
+    <section class="panel">
+      <h2>Filtres</h2>
 
-  {{if .Query}}
-    <p class="search-info">Résultats pour : <b>{{.Query}}</b></p>
-  {{end}}
+      <form class="filters" method="get" action="/">
+        <input type="hidden" name="q" value="{{.Query}}" />
 
-  {{if not .Artists}}
-    <p>Aucun résultat.</p>
-  {{end}}
+        <div class="filters__grid">
+          <div class="filtercard">
+            <h3>Creation date</h3>
+            <div class="row">
+              <label>Min</label>
+              <input type="number" name="creation_min" placeholder="1950" value="{{.CreationMin}}">
+            </div>
+            <div class="row">
+              <label>Max</label>
+              <input type="number" name="creation_max" placeholder="2026" value="{{.CreationMax}}">
+            </div>
+          </div>
 
-  <div class="grid">
-  {{range .Artists}}
-    <div class="card">
-      <img src="{{.Image}}" alt="{{.Name}}">
-      <h2>{{.Name}}</h2>
-      <a href="/artist/{{.ID}}">Voir</a>
-    </div>
-  {{end}}
-  </div>
+          <div class="filtercard">
+            <h3>First album</h3>
+            <div class="row">
+              <label>Min</label>
+              <input type="date" name="first_album_min" value="{{.AlbumMin}}">
+            </div>
+            <div class="row">
+              <label>Max</label>
+              <input type="date" name="first_album_max" value="{{.AlbumMax}}">
+            </div>
+          </div>
+
+          <div class="filtercard">
+            <h3>Number of members</h3>
+            <div class="row">
+              <label>Min</label>
+              <input type="number" name="members_min" placeholder="1" value="{{.MembersMin}}">
+            </div>
+            <div class="row">
+              <label>Max</label>
+              <input type="number" name="members_max" placeholder="10" value="{{.MembersMax}}">
+            </div>
+          </div>
+
+          <div class="filtercard">
+            <h3>Locations</h3>
+            <div class="checkboxes">
+              {{range .LocOptions}}
+              <label class="check">
+                <input type="checkbox" name="location" value="{{.}}" {{if index $.SelectedLocation .}}checked{{end}}>
+                <span>{{.}}</span>
+              </label>
+              {{end}}
+            </div>
+          </div>
+        </div>
+
+        <div class="filters__actions">
+          <button type="submit">Appliquer</button>
+          <a class="reset" href="/">Réinitialiser</a>
+        </div>
+      </form>
+    </section>
+
+    <section class="panel">
+      <h2>Résultats ({{len .Artists}})</h2>
+      <div class="grid">
+        {{range .Artists}}
+        <div class="card">
+          <img src="{{.Image}}" alt="{{.Name}}">
+          <h2>{{.Name}}</h2>
+          <p class="muted">Création: {{.CreationDate}} • Membres: {{len .Members}} • 1er album: {{.FirstAlbum}}</p>
+          <a href="/artist/{{.ID}}">Voir le détail →</a>
+        </div>
+        {{end}}
+      </div>
+    </section>
+  </main>
 
   <script>
-    const input = document.getElementById("searchInput");
-    const box = document.getElementById("suggestions");
+    const input = document.getElementById('searchInput');
+    const box = document.getElementById('suggestions');
+    let last = '';
     let timer = null;
 
-    function hideBox() {
-      box.classList.add("hidden");
-      box.innerHTML = "";
-    }
+    function hide(){ box.classList.add('hidden'); box.innerHTML=''; }
 
-    function showItems(items) {
-      if (!items || items.length === 0) return hideBox();
-
-      box.innerHTML = items.map(it =>
-        `<a class="sugg-item" href="/artist/${it.id}">${it.name}</a>`
-      ).join("");
-
-      box.classList.remove("hidden");
-    }
-
-    input.addEventListener("input", () => {
+    input.addEventListener('input', () => {
       const q = input.value.trim();
+      if (q === last) return;
+      last = q;
       clearTimeout(timer);
-
-      if (q === "") return hideBox();
+      if (!q) { hide(); return; }
 
       timer = setTimeout(async () => {
         try {
-          const res = await fetch(`/suggest?q=${encodeURIComponent(q)}`);
-          const data = await res.json();
-          showItems(data);
+          const res = await fetch('/suggest?q=' + encodeURIComponent(q));
+          if (!res.ok) return hide();
+          const items = await res.json();
+          if (!Array.isArray(items) || items.length === 0) return hide();
+
+          box.innerHTML = items.map(it => (
+            `<a class="sugg-item" href="/artist/${it.id}">${it.name}</a>`
+          )).join('');
+          box.classList.remove('hidden');
         } catch (e) {
-          hideBox();
+          hide();
         }
-      }, 120);
+      }, 150);
     });
 
-    document.addEventListener("click", (e) => {
-      if (!e.target.closest(".searchwrap")) hideBox();
-    });
-
-    input.addEventListener("focus", () => {
-      if (box.innerHTML.trim() !== "") box.classList.remove("hidden");
+    document.addEventListener('click', (e) => {
+      if (!box.contains(e.target) && e.target !== input) hide();
     });
   </script>
 </body>
