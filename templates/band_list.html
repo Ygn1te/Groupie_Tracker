@@ -23,6 +23,52 @@
     <ul id="suggestions"></ul>
   </div>
 
+  <form method="get" class="filters" action="/">
+    <fieldset>
+      <legend>Filters</legend>
+      <div>
+        <label>Creation year between</label>
+        <input type="number" name="creation_min" placeholder="From" value="{{.CreationMin}}"> -
+        <input type="number" name="creation_max" placeholder="To" value="{{.CreationMax}}">
+      </div>
+      <div>
+        <label>First album year between</label>
+        <input type="number" name="album_min" placeholder="From" value="{{.AlbumMin}}"> -
+        <input type="number" name="album_max" placeholder="To" value="{{.AlbumMax}}">
+      </div>
+      <div>
+        <label>Number of members between</label>
+        <input type="number" name="members_min" placeholder="Min" value="{{.MembersMin}}"> -
+        <input type="number" name="members_max" placeholder="Max" value="{{.MembersMax}}">
+      </div>
+      <div>
+        <label>Locations</label>
+        <div class="locations">
+          {{range .LocationsAvailable}}
+            <label><input type="checkbox" name="location" value="{{.}}" {{if index $.SelectedLocationsMap .}}checked{{end}}> {{.}}</label>
+          {{end}}
+        </div>
+      </div>
+      <div>
+        <button type="submit">Apply filters</button>
+        <button id="clearFilters" type="button">Clear</button>
+      </div>
+    </fieldset>
+  </form>
+
+  <script>
+    // Clear filters in the form without reloading the page
+    document.getElementById('clearFilters').addEventListener('click', function () {
+      const form = document.querySelector('form.filters');
+      if (!form) return;
+      const inputs = form.querySelectorAll('input');
+      inputs.forEach(i => {
+        if (i.type === 'checkbox' || i.type === 'radio') i.checked = false;
+        else i.value = '';
+      });
+    });
+  </script>
+
 <div class="artistsGrid">
   {{range .Artists}}
     <a href="/artist/{{.ID}}" class="card">
