@@ -86,55 +86,88 @@
       </form>
     </section>
 
+    
+    
     <section class="panel">
       <h2>Résultats ({{len .Artists}})</h2>
       <div class="grid">
         {{range .Artists}}
         <div class="card">
+          <div class="card-stripes">
+            <div class="stripe stripe-top"></div> <!-- pour l'animation des raies de lumières autour des cards -->
+            <div class="stripe stripe-right"></div>
+            <div class="stripe stripe-bottom"></div>
+            <div class="stripe stripe-left"></div>
+          </div>  
           <img src="{{.Image}}" alt="{{.Name}}">
           <h2>{{.Name}}</h2>
           <p class="muted">Création: {{.CreationDate}} • Membres: {{len .Members}} • 1er album: {{.FirstAlbum}}</p>
-          <a href="/artist/{{.ID}}">Voir le détail →</a>
+          <!-- faire en sorte de taper directement sur la card pour aller sur la page de l'artiste -->
+          <a class="card-link" href="/artist/{{.ID}}"><class>voir infos</class></a>
+
+          
+          
+          
         </div>
         {{end}}
       </div>
     </section>
   </main>
-
+    
+    <script src="/static/testsearchbar.js"></script>
   <script>
-    const input = document.getElementById('searchInput');
-    const box = document.getElementById('suggestions');
-    let last = '';
-    let timer = null;
+    document.addEventListener("DOMContentLoaded", function() {
+      console.log(" Script inline initializing...");
+      
+      const input = document.getElementById('searchInput');
+      const box = document.getElementById('suggestions');
+      
+      if (!input || !box) {
+        console.error(" Éléments DOM manquants");
+        return;
+      }
+      
+      let last = '';
+      let timer = null;
 
-    function hide(){ box.classList.add('hidden'); box.innerHTML=''; }
+      function hide(){ 
+        box.classList.add('hidden'); 
+        box.classList.remove('active');
+        box.innerHTML = '';
+      }
 
-    input.addEventListener('input', () => {
-      const q = input.value.trim();
-      if (q === last) return;
-      last = q;
-      clearTimeout(timer);
-      if (!q) { hide(); return; }
+      input.addEventListener('input', () => {
+        const q = input.value.trim();
+        if (q === last) return;
+        last = q;
+        clearTimeout(timer);
+        if (!q) { hide(); return; }
 
-      timer = setTimeout(async () => {
-        try {
-          const res = await fetch('/suggest?q=' + encodeURIComponent(q));
-          if (!res.ok) return hide();
-          const items = await res.json();
-          if (!Array.isArray(items) || items.length === 0) return hide();
+        timer = setTimeout(async () => {
+          try {
+            const res = await fetch('/suggest?q=' + encodeURIComponent(q));
+            if (!res.ok) return hide();
+            const items = await res.json();
+            if (!Array.isArray(items) || items.length === 0) return hide();
 
-          box.innerHTML = items.map(it => (
-            `<a class="sugg-item" href="/artist/${it.id}">${it.name}</a>`
-          )).join('');
-          box.classList.remove('hidden');
-        } catch (e) {
-          hide();
-        }
-      }, 150);
-    });
+            box.innerHTML = items.map(it => (
+              `<a class="sugg-item" href="/artist/${it.id}">${it.name}</a>`
+            )).join('');
+            box.classList.remove('hidden');
+            box.classList.add('active');
+            console.log("Suggestions affichées avec animation");
+          } catch (e) {
+            console.error(" Erreur:", e);
+            hide();
+          }
+        }, 150);
+      });
 
-    document.addEventListener('click', (e) => {
-      if (!box.contains(e.target) && e.target !== input) hide();
+      document.addEventListener('click', (e) => {
+        if (!box.contains(e.target) && e.target !== input) hide();
+      });
+      
+      console.log(" Script inline prêt");
     });
   </script>
 </body>
