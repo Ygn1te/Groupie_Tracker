@@ -66,7 +66,9 @@ func GetDatesByID(id int) ([]string, error) {
 	}
 	defer resp.Body.Close()
 
-	var d models.DatesResp
+	var d struct {
+		Dates []string `json:"dates"`
+	}
 	err = json.NewDecoder(resp.Body).Decode(&d)
 	return d.Dates, err
 }
@@ -78,7 +80,9 @@ func GetLocationsByID(id int) ([]string, error) {
 	}
 	defer resp.Body.Close()
 
-	var l models.LocationsResp
+	var l struct {
+		Locations []string `json:"locations"`
+	}
 	err = json.NewDecoder(resp.Body).Decode(&l)
 	return l.Locations, err
 }
