@@ -385,7 +385,6 @@ func Home(w http.ResponseWriter, r *http.Request) {
 		sel[s] = true
 	}
 
-	// Group locations by country and sort
 	locationsByCountry := groupLocationsByCountry(cd.LocOpts)
 	cityDisplayNames := makeCityDisplayNames(cd.LocOpts)
 	countriesWithSelected := getCountriesWithSelected(locationsByCountry, sel)
@@ -558,9 +557,7 @@ func Suggest(w http.ResponseWriter, r *http.Request) {
 
 	_ = json.NewEncoder(w).Encode(out)
 }
-// groupLocationsByCountry groups location strings by country.
-// Expects locations in format "City, Country" (comma-separated), extracts country.
-// Countries are sorted alphabetically, and cities within each country are sorted alphabetically.
+
 func groupLocationsByCountry(locations []string) map[string][]string {
 	result := map[string][]string{}
 	for _, loc := range locations {
@@ -568,11 +565,10 @@ func groupLocationsByCountry(locations []string) map[string][]string {
 		if len(parts) < 2 {
 			continue
 		}
-		// Country is the last part after split
+		
 		country := strings.TrimSpace(parts[len(parts)-1])
 		city := strings.TrimSpace(loc)
 
-		// Add city to the country's list if not already there
 		if country != "" {
 			found := false
 			for _, c := range result[country] {
@@ -587,7 +583,6 @@ func groupLocationsByCountry(locations []string) map[string][]string {
 		}
 	}
 
-	// Sort cities alphabetically in each country
 	for country := range result {
 		sort.Strings(result[country])
 	}
@@ -595,7 +590,6 @@ func groupLocationsByCountry(locations []string) map[string][]string {
 	return result
 }
 
-// makeCityDisplayNames creates a map of full location strings to just the city name
 func makeCityDisplayNames(locations []string) map[string]string {
 	cityDisplayNames := make(map[string]string)
 	for _, loc := range locations {
@@ -607,7 +601,6 @@ func makeCityDisplayNames(locations []string) map[string]string {
 	return cityDisplayNames
 }
 
-// getCountriesWithSelected returns a map of countries that have selected cities
 func getCountriesWithSelected(locationsByCountry map[string][]string, selected map[string]bool) map[string]bool {
 	countriesWithSelected := make(map[string]bool)
 	for country, cities := range locationsByCountry {
