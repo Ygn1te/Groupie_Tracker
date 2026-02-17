@@ -1,8 +1,8 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Groupie Tracker</title>
   <link rel="stylesheet" href="/static/style.css">
 </head>
@@ -24,65 +24,74 @@
 
   <main class="container">
     <section class="panel">
-      <h2>Filtres</h2>
-
       <form class="filters" method="get" action="/">
-        <input type="hidden" name="q" value="{{.Query}}" />
+        <details class="filters-section" open>
+          <summary class="filters-toggle">Filtres</summary>
+          
+          <div class="filters-content">
+            <div class="filters__grid">
+              <div class="filtercard">
+                <h3>Date de création</h3>
+                <div class="row">
+                  <label>Min</label>
+                  <input type="number" name="creation_min" placeholder="1950" value="{{.CreationMin}}">
+                </div>
+                <div class="row">
+                  <label>Max</label>
+                  <input type="number" name="creation_max" placeholder="2026" value="{{.CreationMax}}">
+                </div>
+              </div>
 
-        <div class="filters__grid">
-          <div class="filtercard">
-            <h3>Creation date</h3>
-            <div class="row">
-              <label>Min</label>
-              <input type="number" name="creation_min" placeholder="1950" value="{{.CreationMin}}">
+              <div class="filtercard">
+                <h3>Sortie du premier album</h3>
+                <div class="row">
+                  <label>Min</label>
+                  <input type="date" name="first_album_min" value="{{.AlbumMin}}">
+                </div>
+                <div class="row">
+                  <label>Max</label>
+                  <input type="date" name="first_album_max" value="{{.AlbumMax}}">
+                </div>
+              </div>
+
+              <div class="filtercard">
+                <h3>Nombre de membres</h3>
+                <div class="row">
+                  <label>Min</label>
+                  <input type="number" name="members_min" placeholder="1" value="{{.MembersMin}}">
+                </div>
+                <div class="row">
+                  <label>Max</label>
+                  <input type="number" name="members_max" placeholder="10" value="{{.MembersMax}}">
+                </div>
+              </div>
+
+              <div class="filtercard">
+                <h3>Lieux des concerts</h3>
+                <div class="locations">
+                  {{range $country, $cities := .LocationsByCountry}}
+                    <details class="country-details" {{if index $.CountriesWithSelected $country}}open{{end}}>
+                      <summary>{{$country}}</summary>
+                      <div class="cities-list">
+                        {{range $cities}}
+                          <label class="city-label check">
+                            <input type="checkbox" name="location" value="{{.}}" {{if index $.SelectedLocation .}}checked{{end}}>
+                            <span>{{index $.CityDisplayNames .}}</span>
+                          </label>
+                        {{end}}
+                      </div>
+                    </details>
+                  {{end}}
+                </div>
+              </div>
             </div>
-            <div class="row">
-              <label>Max</label>
-              <input type="number" name="creation_max" placeholder="2026" value="{{.CreationMax}}">
+
+            <div class="filters__actions">
+              <button type="submit">Appliquer</button>
+              <button type="button" id="clearFilters" class="btn-clear">Réinitialiser</button>
             </div>
           </div>
-
-          <div class="filtercard">
-            <h3>First album</h3>
-            <div class="row">
-              <label>Min</label>
-              <input type="date" name="first_album_min" value="{{.AlbumMin}}">
-            </div>
-            <div class="row">
-              <label>Max</label>
-              <input type="date" name="first_album_max" value="{{.AlbumMax}}">
-            </div>
-          </div>
-
-          <div class="filtercard">
-            <h3>Number of members</h3>
-            <div class="row">
-              <label>Min</label>
-              <input type="number" name="members_min" placeholder="1" value="{{.MembersMin}}">
-            </div>
-            <div class="row">
-              <label>Max</label>
-              <input type="number" name="members_max" placeholder="10" value="{{.MembersMax}}">
-            </div>
-          </div>
-
-          <div class="filtercard">
-            <h3>Locations</h3>
-            <div class="checkboxes">
-              {{range .LocOptions}}
-              <label class="check">
-                <input type="checkbox" name="location" value="{{.}}" {{if index $.SelectedLocation .}}checked{{end}}>
-                <span>{{.}}</span>
-              </label>
-              {{end}}
-            </div>
-          </div>
-        </div>
-
-        <div class="filters__actions">
-          <button type="submit">Appliquer</button>
-          <a class="reset" href="/">Réinitialiser</a>
-        </div>
+        </details>
       </form>
     </section>
 
@@ -135,6 +144,23 @@
 
     document.addEventListener('click', (e) => {
       if (!box.contains(e.target) && e.target !== input) hide();
+    });
+
+    // Clear filters without reloading page
+    document.getElementById('clearFilters').addEventListener('click', function (e) {
+      e.preventDefault();
+      const form = document.querySelector('.filters');
+      if (!form) return;
+      
+      // Clear all input fields
+      form.querySelectorAll('input[type="number"], input[type="date"]').forEach(input => {
+        input.value = '';
+      });
+      
+      // Uncheck all checkboxes
+      form.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+        checkbox.checked = false;
+      });
     });
   </script>
 </body>

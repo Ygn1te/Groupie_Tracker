@@ -41,16 +41,13 @@
     </section>
 
     <section class="panel">
-      <h2>Dates</h2>
+      <h2>Concerts</h2>
       <ul class="list">
-        {{range .Dates}}<li>{{.}}</li>{{end}}
-      </ul>
-    </section>
-
-    <section class="panel">
-      <h2>Locations</h2>
-      <ul class="list">
-        {{range .Locations}}<li>{{.}}</li>{{end}}
+        {{range .Concerts}}
+        <li>
+          <strong>{{.Date}}</strong> - {{.Location}}
+        </li>
+        {{end}}
       </ul>
     </section>
 

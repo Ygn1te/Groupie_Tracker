@@ -8,8 +8,14 @@
   --accent:#3b82f6;
 }
 
-*{box-sizing:border-box}
-html,body{height:100%}
+*{
+  box-sizing:border-box
+}
+
+html,body{
+  height:100%
+}
+
 body.dark{
   margin:0;
   font-family: Arial, sans-serif;
@@ -17,8 +23,13 @@ body.dark{
   color:var(--text);
 }
 
-a{color:inherit}
-.container{width:min(1100px,92vw); margin:0 auto}
+a{
+  color:inherit
+}
+
+.container{
+  width:min(1100px,92vw); margin:0 auto
+}
 
 .topbar{
   border-bottom:1px solid var(--border);
@@ -28,13 +39,17 @@ a{color:inherit}
   backdrop-filter: blur(6px);
   z-index:10;
 }
+
 .topbar__inner{
   display:flex;
   align-items:center;
   gap:16px;
   padding:14px 0;
 }
-.brand{font-weight:700; text-decoration:none}
+
+.brand{
+  font-weight:700; text-decoration:none
+}
 
 .searchbar{
   flex:1;
@@ -44,11 +59,13 @@ a{color:inherit}
   align-items:center;
   margin:0;
 }
+
 .searchwrap{
   position:relative;
   flex:1;
   max-width:520px;
 }
+
 .searchbar input{
   width:100%;
   padding:10px 12px;
@@ -58,7 +75,11 @@ a{color:inherit}
   color:var(--text);
   outline:none;
 }
-.searchbar input:focus{border-color:var(--accent)}
+
+.searchbar input:focus{
+  border-color:var(--accent)
+}
+
 .searchbar button{
   padding:10px 14px;
   border-radius:10px;
@@ -67,13 +88,20 @@ a{color:inherit}
   color:var(--text);
   cursor:pointer;
 }
-.searchbar button:hover{border-color:var(--accent)}
+
+.searchbar button:hover{
+  border-color:var(--accent)
+}
+
 .searchbar .reset{
   text-decoration:none;
   font-weight:bold;
   color:var(--muted);
 }
-.searchbar .reset:hover{color:var(--text)}
+
+.searchbar .reset:hover{
+  color:var(--text)
+}
 
 .panel{
   background:var(--panel);
@@ -83,15 +111,25 @@ a{color:inherit}
   margin:18px 0;
 }
 
-h1,h2,h3{margin:0 0 12px}
-.muted{color:var(--muted); margin:0}
+h1,h2,h3{
+  margin:0 0 12px
+}
+
+.muted{
+  color:var(--muted); margin:0
+}
 
 .filters__grid{
   display:grid;
   grid-template-columns: repeat(2, minmax(0,1fr));
   gap:12px;
 }
-@media (max-width:900px){ .filters__grid{grid-template-columns:1fr} }
+
+@media (max-width:900px){
+  .filters__grid{
+    grid-template-columns:1fr
+  }
+}
 
 .filtercard{
   background:var(--card);
@@ -99,6 +137,7 @@ h1,h2,h3{margin:0 0 12px}
   border-radius:14px;
   padding:12px;
 }
+
 .row{
   display:flex;
   justify-content:space-between;
@@ -106,7 +145,11 @@ h1,h2,h3{margin:0 0 12px}
   gap:12px;
   margin:8px 0;
 }
-.row label{color:var(--muted)}
+
+.row label{
+  color:var(--muted)
+}
+
 .row input{
   width:180px;
   padding:8px 10px;
@@ -121,6 +164,7 @@ h1,h2,h3{margin:0 0 12px}
   gap:10px;
   margin-top:12px;
 }
+
 .filters__actions button{
   padding:10px 14px;
   border-radius:10px;
@@ -129,7 +173,10 @@ h1,h2,h3{margin:0 0 12px}
   color:var(--text);
   cursor:pointer;
 }
-.filters__actions button:hover{border-color:var(--accent)}
+
+.filters__actions button:hover{
+  border-color:var(--accent)
+}
 
 .checkboxes{
   max-height:220px;
@@ -139,13 +186,17 @@ h1,h2,h3{margin:0 0 12px}
   padding:10px;
   background:rgba(0,0,0,0.12);
 }
+
 .check{
   display:flex;
   gap:10px;
   align-items:center;
   padding:6px 4px;
 }
-.check input{accent-color:var(--accent)}
+
+.check input{
+  accent-color:var(--accent)
+}
 
 .grid{
   display:grid;
@@ -160,29 +211,45 @@ h1,h2,h3{margin:0 0 12px}
   background:var(--card);
   box-shadow: 0 6px 18px rgba(0,0,0,0.22);
 }
+
 .card img{
   width:100%;
   height:auto;
   border-radius:12px;
 }
+
 .card h2{
   font-size:18px;
   margin:12px 0;
 }
+
 .card a{
   display:inline-block;
   text-decoration:none;
   font-weight:bold;
   color:var(--accent);
 }
-.card a:hover{text-decoration:underline}
 
-.artistHeader{display:flex; gap:14px; align-items:center}
-.artistHeader__img{width:96px; height:96px; border-radius:18px; object-fit:cover; border:1px solid var(--border)}
+.card a:hover{
+  text-decoration:underline
+}
 
-.list{margin:0; padding-left:18px; line-height:1.6}
+.artistHeader{
+  display:flex; gap:14px; align-items:center
+}
 
-.mapWrap{display:flex; justify-content:center}
+.artistHeader__img{
+  width:96px; height:96px; border-radius:18px; object-fit:cover; border:1px solid var(--border)
+}
+
+.list{
+  margin:0; padding-left:18px; line-height:1.6
+}
+
+.mapWrap{
+  display:flex; justify-content:center
+}
+
 .mapBox{
   width:min(860px, 100%);
   height:420px;
@@ -191,8 +258,13 @@ h1,h2,h3{margin:0 0 12px}
   overflow:hidden;
 }
 
-.btnLink{color:var(--accent); font-weight:bold; text-decoration:none}
-.btnLink:hover{text-decoration:underline}
+.btnLink{
+  color:var(--accent); font-weight:bold; text-decoration:none
+}
+
+.btnLink:hover{
+  text-decoration:underline
+}
 
 .suggestions{
   position:absolute;
@@ -207,11 +279,92 @@ h1,h2,h3{margin:0 0 12px}
   z-index:50;
   text-align:left;
 }
-.suggestions.hidden{display:none}
+.suggestions.hidden{
+  display:none
+}
+
 .sugg-item{
   display:block;
   padding:10px 12px;
   text-decoration:none;
   color:var(--text);
 }
-.sugg-item:hover{background:rgba(59,130,246,0.15)}
+.sugg-item:hover{
+  background:rgba(59,130,246,0.15)
+}
+
+.filters-section {
+  margin: 0;
+}
+
+.filters-toggle {
+  cursor: pointer;
+  font-weight: 700;
+  padding: 10px;
+  user-select: none;
+}
+
+.filters-toggle:hover {
+  color: var(--accent);
+}
+
+.filters-content {
+  padding: 10px 0;
+}
+
+.locations {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 30px;
+  margin-top: 10px;
+  height: 300px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 10px;
+}
+
+.country-details {
+  margin-bottom: 15px;
+}
+
+.country-details summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--accent);
+  padding: 8px;
+  user-select: none;
+}
+
+.country-details summary:hover {
+  color: var(--text);
+}
+
+.cities-list {
+  display: flex;
+  flex-direction: column;
+  margin-left: 20px;
+  padding: 8px 0;
+}
+
+.city-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.city-label input[type="checkbox"] {
+  cursor: pointer;
+}
+
+.city-label:hover {
+  color: var(--accent);
+}
+
+.btn-clear {
+  margin-left: 10px;
+}

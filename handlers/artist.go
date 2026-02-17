@@ -16,6 +16,11 @@ import (
 
 const baseAPI = "https://groupietrackers.herokuapp.com/api"
 
+type Concert struct {
+	Date     string
+	Location string
+}
+
 func GetArtists() ([]models.Artist, error) {
 	resp, err := http.Get(baseAPI + "/artists")
 	if err != nil {
@@ -337,6 +342,9 @@ type IndexData struct {
 
 	LocOptions       []string
 	SelectedLocation map[string]bool
+	LocationsByCountry map[string][]string
+	CityDisplayNames map[string]string
+	CountriesWithSelected map[string]bool
 }
 
 func Home(w http.ResponseWriter, r *http.Request) {
@@ -365,6 +373,11 @@ func Home(w http.ResponseWriter, r *http.Request) {
 		sel[s] = true
 	}
 
+	// Group locations by country and sort
+	locationsByCountry := groupLocationsByCountry(cd.LocOpts)
+	cityDisplayNames := makeCityDisplayNames(cd.LocOpts)
+	countriesWithSelected := getCountriesWithSelected(locationsByCountry, sel)
+
 	data := IndexData{
 		Artists: res,
 		Query:   fq.Search,
@@ -378,6 +391,9 @@ func Home(w http.ResponseWriter, r *http.Request) {
 
 		LocOptions:       cd.LocOpts,
 		SelectedLocation: sel,
+		LocationsByCountry: locationsByCountry,
+		CityDisplayNames: cityDisplayNames,
+		CountriesWithSelected: countriesWithSelected,
 	}
 
 	if err := tmpl.Execute(w, data); err != nil {
@@ -446,10 +462,28 @@ func ArtistDetail(w http.ResponseWriter, r *http.Request) {
 		geoJSONBytes = []byte("[]")
 	}
 
+	// Combine dates and locations into concerts
+	concerts := make([]Concert, 0)
+	maxLen := len(dates)
+	if len(locations) > maxLen {
+		maxLen = len(locations)
+	}
+	for i := 0; i < maxLen; i++ {
+		concert := Concert{}
+		if i < len(dates) {
+			concert.Date = dates[i]
+		}
+		if i < len(locations) {
+			concert.Location = locations[i]
+		}
+		concerts = append(concerts, concert)
+	}
+
 	data := struct {
 		Artist    *models.Artist
 		Dates     []string
 		Locations []string
+		Concerts  []Concert
 		GeoJSON   template.JS
 
 		Query string
@@ -457,6 +491,7 @@ func ArtistDetail(w http.ResponseWriter, r *http.Request) {
 		Artist:    found,
 		Dates:     dates,
 		Locations: locations,
+		Concerts:  concerts,
 		GeoJSON:   template.JS(geoJSONBytes),
 		Query:     strings.TrimSpace(r.URL.Query().Get("q")),
 	}
@@ -508,4 +543,66 @@ func Suggest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	_ = json.NewEncoder(w).Encode(out)
+}
+// groupLocationsByCountry groups location strings by country.
+// Expects locations in format "City, Country" (comma-separated), extracts country.
+// Countries are sorted alphabetically, and cities within each country are sorted alphabetically.
+func groupLocationsByCountry(locations []string) map[string][]string {
+	result := map[string][]string{}
+	for _, loc := range locations {
+		parts := strings.Split(loc, ",")
+		if len(parts) < 2 {
+			continue
+		}
+		// Country is the last part after split
+		country := strings.TrimSpace(parts[len(parts)-1])
+		city := strings.TrimSpace(loc)
+
+		// Add city to the country's list if not already there
+		if country != "" {
+			found := false
+			for _, c := range result[country] {
+				if c == city {
+					found = true
+					break
+				}
+			}
+			if !found {
+				result[country] = append(result[country], city)
+			}
+		}
+	}
+
+	// Sort cities alphabetically in each country
+	for country := range result {
+		sort.Strings(result[country])
+	}
+
+	return result
+}
+
+// makeCityDisplayNames creates a map of full location strings to just the city name
+func makeCityDisplayNames(locations []string) map[string]string {
+	cityDisplayNames := make(map[string]string)
+	for _, loc := range locations {
+		parts := strings.Split(loc, ",")
+		if len(parts) >= 1 {
+			cityDisplayNames[loc] = strings.TrimSpace(parts[0])
+		}
+	}
+	return cityDisplayNames
+}
+
+// getCountriesWithSelected returns a map of countries that have selected cities
+func getCountriesWithSelected(locationsByCountry map[string][]string, selected map[string]bool) map[string]bool {
+	countriesWithSelected := make(map[string]bool)
+	for country, cities := range locationsByCountry {
+		for _, city := range cities {
+			if selected[city] {
+				countriesWithSelected[country] = true
+				break
+			}
+		}
+	}
+	return countriesWithSelected
 }
