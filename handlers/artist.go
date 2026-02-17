@@ -259,16 +259,8 @@ func applyFilters(artists []models.Artist, locMap map[int][]string, fq FilterQue
 
 	for _, a := range artists {
 		if needle != "" {
-			nameOK := strings.Contains(strings.ToLower(a.Name), needle)
+			nameOK := strings.HasPrefix(strings.ToLower(a.Name), needle)
 			memOK := false
-			if !nameOK {
-				for _, m := range a.Members {
-					if strings.Contains(strings.ToLower(m), needle) {
-						memOK = true
-						break
-					}
-				}
-			}
 			if !nameOK && !memOK {
 				continue
 			}
@@ -308,6 +300,10 @@ func applyFilters(artists []models.Artist, locMap map[int][]string, fq FilterQue
 
 		out = append(out, a)
 	}
+
+	sort.Slice(out, func(i, j int) bool {
+		return strings.ToLower(out[i].Name) < strings.ToLower(out[j].Name)
+	})
 
 	return out
 }
@@ -352,10 +348,10 @@ type IndexData struct {
 	AlbumMin    string
 	AlbumMax    string
 
-	LocOptions       []string
-	SelectedLocation map[string]bool
-	LocationsByCountry map[string][]string
-	CityDisplayNames map[string]string
+	LocOptions            []string
+	SelectedLocation      map[string]bool
+	LocationsByCountry    map[string][]string
+	CityDisplayNames      map[string]string
 	CountriesWithSelected map[string]bool
 }
 
@@ -400,10 +396,10 @@ func Home(w http.ResponseWriter, r *http.Request) {
 		AlbumMin:    r.URL.Query().Get("first_album_min"),
 		AlbumMax:    r.URL.Query().Get("first_album_max"),
 
-		LocOptions:       cd.LocOpts,
-		SelectedLocation: sel,
-		LocationsByCountry: locationsByCountry,
-		CityDisplayNames: cityDisplayNames,
+		LocOptions:            cd.LocOpts,
+		SelectedLocation:      sel,
+		LocationsByCountry:    locationsByCountry,
+		CityDisplayNames:      cityDisplayNames,
 		CountriesWithSelected: countriesWithSelected,
 	}
 
@@ -565,7 +561,7 @@ func groupLocationsByCountry(locations []string) map[string][]string {
 		if len(parts) < 2 {
 			continue
 		}
-		
+
 		country := strings.TrimSpace(parts[len(parts)-1])
 		city := strings.TrimSpace(loc)
 
