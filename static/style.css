@@ -350,3 +350,41 @@ li {
   border-bottom: none;
 }
 
+.locations {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 25px;
+  text-align: left;
+}
+
+.locations details {
+  background: none;
+  padding: 0;
+}
+
+.locations summary {
+  cursor: pointer;
+  font-weight: bold;
+  margin-bottom: 8px;
+  list-style: none; /* enlève la flèche par défaut si besoin */
+}
+
+.locations summary::-webkit-details-marker {
+  display: none; /* supprime la flèche native */
+}
+
+.locations summary::before {
+  content: "▸ ";
+  color: #cd2727;
+}
+
+.locations details[open] summary::before {
+  content: "▾ ";
+}
+
+.locations label {
+  display: block;
+  margin-left: 20px; /* indentation */
+  margin-bottom: 5px;
+  font-size: 0.9rem;
+}

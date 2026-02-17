@@ -44,8 +44,13 @@
       <div>
         <label>Locations</label>
         <div class="locations">
-          {{range .LocationsAvailable}}
-            <label><input type="checkbox" name="location" value="{{.}}" {{if index $.SelectedLocationsMap .}}checked{{end}}> {{.}}</label>
+          {{range $country, $cities := .LocationsByCountry}}
+            <details {{if index $.CountriesWithSelected $country}}open{{end}}>
+              <summary>{{$country}}</summary>
+              {{range $cities}}
+                <label><input type="checkbox" name="location" value="{{.}}" {{if index $.SelectedLocationsMap .}}checked{{end}}> {{index $.CityDisplayNames .}}</label>
+              {{end}}
+            </details>
           {{end}}
         </div>
       </div>

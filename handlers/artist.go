@@ -5,6 +5,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -114,6 +115,29 @@ func Home(w http.ResponseWriter, r *http.Request) {
 		availableLocations = append(availableLocations, l)
 	}
 
+	// Group locations by country (split by "-")
+	locationsByCountry := groupLocationsByCountry(availableLocations)
+
+	// Create display names for cities (City-Country -> City)
+	cityDisplayNames := make(map[string]string)
+	for _, loc := range availableLocations {
+		parts := strings.Split(loc, "-")
+		if len(parts) >= 1 {
+			cityDisplayNames[loc] = strings.TrimSpace(parts[0])
+		}
+	}
+
+	// Check which countries have selected cities
+	countriesWithSelected := make(map[string]bool)
+	for country, cities := range locationsByCountry {
+		for _, city := range cities {
+			if selMap[city] {
+				countriesWithSelected[country] = true
+				break
+			}
+		}
+	}
+
 	// Apply filters
 	var filtered []models.Artist
 	for _, a := range artists {
@@ -173,6 +197,9 @@ func Home(w http.ResponseWriter, r *http.Request) {
 		AlbumMax string
 		MembersMin string
 		MembersMax string
+		LocationsByCountry map[string][]string
+		CityDisplayNames map[string]string
+		CountriesWithSelected map[string]bool
 	}{
 		Query:              q,
 		Artists:            filtered,
@@ -185,6 +212,9 @@ func Home(w http.ResponseWriter, r *http.Request) {
 		AlbumMax: albumMaxStr,
 		MembersMin: membersMinStr,
 		MembersMax: membersMaxStr,
+		LocationsByCountry: locationsByCountry,
+		CityDisplayNames: cityDisplayNames,
+		CountriesWithSelected: countriesWithSelected,
 	}
 
 	if err := tmpl.Execute(w, data); err != nil {
@@ -304,4 +334,38 @@ func Search(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(res)
+}
+
+// groupLocationsByCountry groups location strings by country.
+// Expects locations in format "City-Country", splits by "-" to extract country.
+// Cities in each country are sorted alphabetically.
+func groupLocationsByCountry(locations []string) map[string][]string {
+	result := map[string][]string{}
+	for _, loc := range locations {
+		parts := strings.Split(loc, "-")
+		if len(parts) < 2 {
+			continue
+		}
+		country := strings.TrimSpace(parts[len(parts)-1])
+		city := strings.TrimSpace(loc)
+
+		// Add city to the country's list if not already there
+		if country != "" {
+			found := false
+			for _, c := range result[country] {
+				if c == city {
+					found = true
+					break
+				}
+			}
+			if !found {
+				result[country] = append(result[country], city)
+			}
+		}
+	}
+	// Sort cities alphabetically in each country
+	for country := range result {
+		sort.Strings(result[country])
+	}
+	return result
 }
