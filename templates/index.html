@@ -147,24 +147,20 @@
       if (!box.contains(e.target) && e.target !== input) hide();
     });
 
-    // Clear filters without reloading page
     document.getElementById('clearFilters').addEventListener('click', function (e) {
       e.preventDefault();
       const form = document.querySelector('.filters');
       if (!form) return;
       
-      // Clear all input fields
       form.querySelectorAll('input[type="number"], input[type="date"]').forEach(input => {
         input.value = '';
       });
       
-      // Uncheck all checkboxes
       form.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
         checkbox.checked = false;
       });
     });
 
-    // Back to top button
     const backToTopBtn = document.getElementById('backToTop');
     window.addEventListener('scroll', () => {
       if (window.scrollY > 300) {
