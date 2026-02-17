@@ -17,8 +17,8 @@ import (
 const baseAPI = "https://groupietrackers.herokuapp.com/api"
 
 type Concert struct {
-	Date     string
 	Location string
+	Dates    []string
 }
 
 func GetArtists() ([]models.Artist, error) {
@@ -81,6 +81,18 @@ func GetLocationsByID(id int) ([]string, error) {
 	var l models.LocationsResp
 	err = json.NewDecoder(resp.Body).Decode(&l)
 	return l.Locations, err
+}
+
+func GetRelationsByID(id int) (map[string][]string, error) {
+	resp, err := http.Get(baseAPI + "/relation/" + strconv.Itoa(id))
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	var rel models.RelationsResp
+	err = json.NewDecoder(resp.Body).Decode(&rel)
+	return rel.DatesLocations, err
 }
 
 type cachedData struct {
@@ -446,6 +458,25 @@ func ArtistDetail(w http.ResponseWriter, r *http.Request) {
 		locations = []string{}
 	}
 
+	datesLocations, err := GetRelationsByID(id)
+	if err != nil {
+		log.Println("Relations error:", err)
+		datesLocations = make(map[string][]string)
+	}
+
+	concerts := make([]Concert, 0)
+	for location, dateList := range datesLocations {
+		concert := Concert{
+			Location: location,
+			Dates:    dateList,
+		}
+		concerts = append(concerts, concert)
+	}
+
+	sort.Slice(concerts, func(i, j int) bool {
+		return concerts[i].Location < concerts[j].Location
+	})
+
 	var geoLocations []GeoLocation
 	for _, loc := range locations {
 		gl, err := GeocodeOpenCage(loc)
@@ -460,23 +491,6 @@ func ArtistDetail(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println("GeoJSON error:", err)
 		geoJSONBytes = []byte("[]")
-	}
-
-	// Combine dates and locations into concerts
-	concerts := make([]Concert, 0)
-	maxLen := len(dates)
-	if len(locations) > maxLen {
-		maxLen = len(locations)
-	}
-	for i := 0; i < maxLen; i++ {
-		concert := Concert{}
-		if i < len(dates) {
-			concert.Date = dates[i]
-		}
-		if i < len(locations) {
-			concert.Location = locations[i]
-		}
-		concerts = append(concerts, concert)
 	}
 
 	data := struct {

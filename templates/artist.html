@@ -45,7 +45,10 @@
       <ul class="list">
         {{range .Concerts}}
         <li>
-          <strong>{{.Date}}</strong> - {{.Location}}
+          <strong>{{.Location}}</strong>
+          <ul style="margin-top: 5px; margin-bottom: 10px;">
+            {{range .Dates}}<li style="font-size: 0.9em;">{{.}}</li>{{end}}
+          </ul>
         </li>
         {{end}}
       </ul>

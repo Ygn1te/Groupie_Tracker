@@ -99,16 +99,17 @@
       <h2>Résultats ({{len .Artists}})</h2>
       <div class="grid">
         {{range .Artists}}
-        <div class="card">
+        <a href="/artist/{{.ID}}" class="card">
           <img src="{{.Image}}" alt="{{.Name}}">
           <h2>{{.Name}}</h2>
           <p class="muted">Création: {{.CreationDate}} • Membres: {{len .Members}} • 1er album: {{.FirstAlbum}}</p>
-          <a href="/artist/{{.ID}}">Voir le détail →</a>
-        </div>
+        </a>
         {{end}}
       </div>
     </section>
   </main>
+
+  <button id="backToTop" class="back-to-top">↑</button>
 
   <script>
     const input = document.getElementById('searchInput');
@@ -161,6 +162,20 @@
       form.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
         checkbox.checked = false;
       });
+    });
+
+    // Back to top button
+    const backToTopBtn = document.getElementById('backToTop');
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 300) {
+        backToTopBtn.classList.add('show');
+      } else {
+        backToTopBtn.classList.remove('show');
+      }
+    });
+
+    backToTopBtn.addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     });
   </script>
 </body>

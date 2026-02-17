@@ -210,6 +210,14 @@ h1,h2,h3{
   padding:14px;
   background:var(--card);
   box-shadow: 0 6px 18px rgba(0,0,0,0.22);
+  text-decoration:none;
+  transition:transform 0.2s ease, box-shadow 0.2s ease;
+  display:block;
+}
+
+.card:hover{
+  transform:scale(1.05);
+  box-shadow: 0 12px 28px rgba(0,0,0,0.35);
 }
 
 .card img{
@@ -223,15 +231,10 @@ h1,h2,h3{
   margin:12px 0;
 }
 
-.card a{
+.card p{
   display:inline-block;
-  text-decoration:none;
-  font-weight:bold;
-  color:var(--accent);
-}
-
-.card a:hover{
-  text-decoration:underline
+  font-weight:normal;
+  color:var(--text);
 }
 
 .artistHeader{
@@ -365,6 +368,39 @@ h1,h2,h3{
   color: var(--accent);
 }
 
+.back-to-top {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: white;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(20px);
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  z-index: 999;
+}
+
+.back-to-top.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.back-to-top:hover {
+  transform: scale(1.1) translateY(0);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+}
 .btn-clear {
   margin-left: 10px;
 }
