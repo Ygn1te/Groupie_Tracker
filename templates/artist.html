@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{{.Artist.Name}}</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="dark">
+  <header class="topbar">
+    <div class="container topbar__inner">
+      <a class="brand" href="/">Groupie Tracker</a>
+
+      <form class="searchbar" action="/" method="get" autocomplete="off">
+        <div class="searchwrap">
+          <input id="searchInput" type="search" name="q" placeholder="Rechercher (groupe ou membre)..." value="{{.Query}}">
+          <div id="suggestions" class="suggestions hidden"></div>
+        </div>
+        <button type="submit">Rechercher</button>
+        <a class="reset" href="/">Reset</a>
+      </form>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="panel">
+      <div class="artistHeader">
+        <img class="artistHeader__img" src="{{.Artist.Image}}" alt="image artiste">
+        <div>
+          <h1>{{.Artist.Name}}</h1>
+          <p class="muted">Création: {{.Artist.CreationDate}} • Membres: {{len .Artist.Members}} • 1er album: {{.Artist.FirstAlbum}}</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Membres</h2>
+      <ul class="list">
+        {{range .Artist.Members}}<li>{{.}}</li>{{end}}
+      </ul>
+    </section>
+
+    <section class="panel">
+      <h2>Concerts</h2>
+      <ul class="list">
+        {{range .Concerts}}
+        <li>
+          <strong>{{.Location}}</strong>
+          <ul style="margin-top: 5px; margin-bottom: 10px;">
+            {{range .Dates}}<li style="font-size: 0.9em;">{{.}}</li>{{end}}
+          </ul>
+        </li>
+        {{end}}
+      </ul>
+    </section>
+
+    <section class="panel">
+      <h2>Carte des concerts</h2>
+      <div class="mapWrap">
+        <div id="map" class="mapBox"></div>
+      </div>
+    </section>
+
+    <p><a class="btnLink" href="/">⬅ Retour</a></p>
+  </main>
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+  <script>
+    const points = {{ .GeoJSON }};
+    const map = L.map('map').setView([48.8566, 2.3522], 3);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 18,
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    const bounds = [];
+    points.forEach(p => {
+      const marker = L.marker([p.lat, p.lng]).addTo(map);
+      marker.bindPopup('<b>' + p.name + '</b>');
+      bounds.push([p.lat, p.lng]);
+    });
+    if (bounds.length > 0) {
+      map.fitBounds(bounds, { padding: [30, 30] });
+    }
+    setTimeout(() => map.invalidateSize(), 200);
+
+    const input = document.getElementById('searchInput');
+    const box = document.getElementById('suggestions');
+    let last = '';
+    let timer = null;
+
+    function hide(){ box.classList.add('hidden'); box.innerHTML=''; }
+
+    input.addEventListener('input', () => {
+      const q = input.value.trim();
+      if (q === last) return;
+      last = q;
+      clearTimeout(timer);
+      if (!q) { hide(); return; }
+
+      timer = setTimeout(async () => {
+        try {
+          const res = await fetch('/suggest?q=' + encodeURIComponent(q));
+          if (!res.ok) return hide();
+          const items = await res.json();
+          if (!Array.isArray(items) || items.length === 0) return hide();
+
+          box.innerHTML = items.map(it => (
+            `<a class="sugg-item" href="/artist/${it.id}">${it.name}</a>`
+          )).join('');
+          box.classList.remove('hidden');
+        } catch (e) {
+          hide();
+        }
+      }, 150);
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!box.contains(e.target) && e.target !== input) hide();
+    });
+  </script>
+</body>
+</html>

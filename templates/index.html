@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Groupie Tracker</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="dark">
+  <header class="topbar">
+    <div class="container topbar__inner">
+      <a class="brand" href="/">Groupie Tracker</a>
+
+      <form class="searchbar" action="/" method="get" autocomplete="off">
+        <div class="searchwrap">
+          <input id="searchInput" type="search" name="q" placeholder="Rechercher (groupe ou membre)..." value="{{.Query}}">
+          <div id="suggestions" class="suggestions hidden"></div>
+        </div>
+        <button type="submit">Rechercher</button>
+        <a class="reset" href="/">Reset</a>
+      </form>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="panel">
+      <form class="filters" method="get" action="/">
+        <details class="filters-section" open>
+          <summary class="filters-toggle">Filtres</summary>
+          
+          <div class="filters-content">
+            <div class="filters__grid">
+              <div class="filtercard">
+                <h3>Date de création</h3>
+                <div class="row">
+                  <label>Min</label>
+                  <input type="number" name="creation_min" placeholder="1950" value="{{.CreationMin}}">
+                </div>
+                <div class="row">
+                  <label>Max</label>
+                  <input type="number" name="creation_max" placeholder="2026" value="{{.CreationMax}}">
+                </div>
+              </div>
+
+              <div class="filtercard">
+                <h3>Sortie du premier album</h3>
+                <div class="row">
+                  <label>Min</label>
+                  <input type="date" name="first_album_min" value="{{.AlbumMin}}">
+                </div>
+                <div class="row">
+                  <label>Max</label>
+                  <input type="date" name="first_album_max" value="{{.AlbumMax}}">
+                </div>
+              </div>
+
+              <div class="filtercard">
+                <h3>Nombre de membres</h3>
+                <div class="row">
+                  <label>Min</label>
+                  <input type="number" name="members_min" placeholder="1" value="{{.MembersMin}}">
+                </div>
+                <div class="row">
+                  <label>Max</label>
+                  <input type="number" name="members_max" placeholder="10" value="{{.MembersMax}}">
+                </div>
+              </div>
+
+              <div class="filtercard">
+                <h3>Lieux des concerts</h3>
+                <div class="locations">
+                  {{range $country, $cities := .LocationsByCountry}}
+                    <details class="country-details" {{if index $.CountriesWithSelected $country}}open{{end}}>
+                      <summary>{{$country}}</summary>
+                      <div class="cities-list">
+                        {{range $cities}}
+                          <label class="city-label check">
+                            <input type="checkbox" name="location" value="{{.}}" {{if index $.SelectedLocation .}}checked{{end}}>
+                            <span>{{index $.CityDisplayNames .}}</span>
+                          </label>
+                        {{end}}
+                      </div>
+                    </details>
+                  {{end}}
+                </div>
+              </div>
+            </div>
+
+            <div class="filters__actions">
+              <button type="submit">Appliquer</button>
+              <button type="button" id="clearFilters" class="btn-clear">Réinitialiser</button>
+            </div>
+          </div>
+        </details>
+      </form>
+    </section>
+
+    <section class="panel">
+      <h2>Résultats ({{len .Artists}})</h2>
+      <div class="grid">
+        {{range .Artists}}
+        <a href="/artist/{{.ID}}" class="card">
+          <img src="{{.Image}}" alt="{{.Name}}">
+          <h2>{{.Name}}</h2>
+          <p class="muted">Création: {{.CreationDate}} • Membres: {{len .Members}} • 1er album: {{.FirstAlbum}}</p>
+        </a>
+        {{end}}
+      </div>
+    </section>
+  </main>
+
+  <button id="backToTop" class="back-to-top">↑</button>
+
+  <script>
+    const input = document.getElementById('searchInput');
+    const box = document.getElementById('suggestions');
+    let last = '';
+    let timer = null;
+
+    function hide(){ box.classList.add('hidden'); box.innerHTML=''; }
+
+    input.addEventListener('input', () => {
+      const q = input.value.trim();
+      if (q === last) return;
+      last = q;
+      clearTimeout(timer);
+      if (!q) { hide(); return; }
+
+      timer = setTimeout(async () => {
+        try {
+          const res = await fetch('/suggest?q=' + encodeURIComponent(q));
+          if (!res.ok) return hide();
+          const items = await res.json();
+          if (!Array.isArray(items) || items.length === 0) return hide();
+
+          box.innerHTML = items.map(it => (
+            `<a class="sugg-item" href="/artist/${it.id}">${it.name}</a>`
+          )).join('');
+          box.classList.remove('hidden');
+        } catch (e) {
+          hide();
+        }
+      }, 150);
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!box.contains(e.target) && e.target !== input) hide();
+    });
+
+    // Clear filters without reloading page
+    document.getElementById('clearFilters').addEventListener('click', function (e) {
+      e.preventDefault();
+      const form = document.querySelector('.filters');
+      if (!form) return;
+      
+      // Clear all input fields
+      form.querySelectorAll('input[type="number"], input[type="date"]').forEach(input => {
+        input.value = '';
+      });
+      
+      // Uncheck all checkboxes
+      form.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+        checkbox.checked = false;
+      });
+    });
+
+    // Back to top button
+    const backToTopBtn = document.getElementById('backToTop');
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 300) {
+        backToTopBtn.classList.add('show');
+      } else {
+        backToTopBtn.classList.remove('show');
+      }
+    });
+
+    backToTopBtn.addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  </script>
+</body>
+</html>
